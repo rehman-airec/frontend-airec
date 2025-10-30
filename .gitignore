@@ -1,41 +1,57 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+.pnp/
+.pnp.cjs
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Next.js
+.next/
+.next/cache/
+out/
 
-# testing
-/coverage
+# Build outputs
+build/
+dist/
+*.tsbuildinfo
 
-# next.js
-/.next/
-/out/
+# Vercel / Turbo / Tooling caches
+.vercel/
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Coverage
+coverage/
 
-# vercel
-.vercel
+# Environment variables
+.env
+.env.*
+!.env.example
 
-# typescript
-*.tsbuildinfo
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Misc
+*.local
+*.swp
+*.swo
+
+# TypeScript
+# Already covered above but keep explicit for clarity
 next-env.d.ts
+
+# Lockfiles (keep the one you use; ignore others by default)
+# Uncomment to enforce a single lockfile type across environments
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

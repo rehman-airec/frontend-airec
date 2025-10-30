@@ -1,26 +1,204 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import '../components/wysiwyg/styles/wysiwyg.css';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    font-family: system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-white text-gray-900;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Enhanced prose styling for job descriptions */
+  .prose-gray {
+    color: #374151;
+  }
+  
+  .prose-gray h1,
+  .prose-gray h2,
+  .prose-gray h3,
+  .prose-gray h4,
+  .prose-gray h5,
+  .prose-gray h6 {
+    color: #111827;
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+  
+  .prose-gray h1 {
+    font-size: 1.875rem;
+  }
+  
+  .prose-gray h2 {
+    font-size: 1.5rem;
+  }
+  
+  .prose-gray h3 {
+    font-size: 1.25rem;
+  }
+  
+  .prose-gray p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+  }
+  
+  .prose-gray ul,
+  .prose-gray ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+  }
+  
+  .prose-gray li {
+    margin-bottom: 0.5em;
+    line-height: 1.6;
+  }
+  
+  .prose-gray strong {
+    font-weight: 600;
+    color: #111827;
+  }
+  
+  .prose-gray a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  
+  .prose-gray a:hover {
+    color: #1d4ed8;
+  }
+  
+  /* Custom animations for home page */
+  .animate-blob {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: blob 7s ease-in-out infinite;
+  }
+  
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+  
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  
+  .animate-fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  /* Gradient text utilities */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Custom glassmorphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  
+  /* Enhanced gradient animation */
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+  }
+  
+  /* Smooth slide transitions */
+  .slide-transition {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Enhanced shadow effects */
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+@keyframes blob {
+  0% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+}
+
+/* Hover effects for cards */
+@layer components {
+  .hover-card {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .hover-card:hover {
+    @apply transform -translate-y-2 shadow-2xl;
+  }
+  
+  /* Button hover effects */
+  .btn-glow:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  
+  /* Loading spinner enhancement */
+  .spinner-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
 }
