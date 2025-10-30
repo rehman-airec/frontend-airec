@@ -5,6 +5,7 @@ import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { AlertProvider } from '@/providers/AlertProvider';
 import { ToastProvider } from '@/components/notifications/ToastProvider';
+import { SocketProvider } from '@/providers/SocketProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,8 +25,10 @@ export default function RootLayout({
         <ReactQueryProvider>
           <AuthProvider>
             <AlertProvider>
-              {children}
-              <ToastProvider />
+              <SocketProvider>
+                {children}
+                <ToastProvider />
+              </SocketProvider>
             </AlertProvider>
           </AuthProvider>
         </ReactQueryProvider>

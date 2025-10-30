@@ -11,6 +11,7 @@ interface CandidateInfoProps {
   status: string;
   onStatusChange?: (status: string) => void;
   isGuestApplication?: boolean;
+  pendingStatus?: string | null;
 }
 
 const CandidateInfo: React.FC<CandidateInfoProps> = ({ 
@@ -18,7 +19,8 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({
   job,
   status,
   onStatusChange,
-  isGuestApplication = false
+  isGuestApplication = false,
+  pendingStatus = null
 }) => {
   const orderedStatuses = [
     'New',
@@ -107,7 +109,7 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({
                   <button
                     key={value}
                     type="button"
-                    onClick={() => onStatusChange?.(value)}
+                    onClick={() => !pendingStatus && onStatusChange?.(value)}
                     className={
                       `flex items-center w-full px-4 py-3 text-left transition-colors ` +
                       (isSelected(value)
@@ -117,8 +119,18 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({
                     }
                     aria-pressed={isSelected(value)}
                     aria-label={`Set status to ${value}`}
+                    disabled={!!pendingStatus}
                   >
                     <span className="font-medium truncate" title={value}>{value}</span>
+                    {pendingStatus === value && (
+                      <span className="ml-auto inline-flex items-center text-xs text-gray-600">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                        Updating…
+                      </span>
+                    )}
                     {isSelected(value) && (
                       <span className="ml-auto inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
                         Selected

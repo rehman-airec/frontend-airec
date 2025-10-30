@@ -71,12 +71,13 @@ const GuestApplicationTrackingPage: React.FC = () => {
     );
   }
 
-  const { application, job, candidate } = applicationData;
-  const guestApp = application.guestApplication;
+  const application = applicationData.application;
+  const { job, candidate } = application || {} as any;
+  const guestApp = application?.guestApplication;
 
   return (
     <div className="p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <Button
@@ -89,7 +90,7 @@ const GuestApplicationTrackingPage: React.FC = () => {
           </Button>
           <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
           <p className="text-gray-600 mt-2">
-            Track your application for {job.title} at {job.department}
+            Track your application for {job?.title || 'the position'} at {job?.department || 'the company'}
           </p>
         </div>
 
@@ -140,34 +141,34 @@ const GuestApplicationTrackingPage: React.FC = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-medium text-gray-900">{job.title}</h3>
-                    <p className="text-gray-600">{job.department}</p>
+                    <h3 className="font-medium text-gray-900">{job?.title}</h3>
+                    <p className="text-gray-600">{job?.department}</p>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <h4 className="font-medium text-gray-900">Location</h4>
                       <p className="text-gray-600">
-                        {job.location.city}, {job.location.country}
-                        {job.location.remote && ' (Remote)'}
+                        {job?.location?.city}, {job?.location?.country}
+                        {job?.location?.remote && ' (Remote)'}
                       </p>
                     </div>
                     <div>
                       <h4 className="font-medium text-gray-900">Employment Type</h4>
-                      <p className="text-gray-600">{job.employmentType}</p>
+                      <p className="text-gray-600">{job?.employmentType}</p>
                     </div>
                     <div>
                       <h4 className="font-medium text-gray-900">Experience Level</h4>
-                      <p className="text-gray-600">{job.experienceLevel}</p>
+                      <p className="text-gray-600">{job?.experienceLevel}</p>
                     </div>
-                    {job.salaryRange && (
+                    {job?.salaryRange && (
                       <div>
                         <h4 className="font-medium text-gray-900">Salary</h4>
                         <p className="text-gray-600">
                           {formatSalaryRange(
-                            job.salaryRange.min,
-                            job.salaryRange.max,
-                            job.salaryRange.currency
+                            job?.salaryRange?.min,
+                            job?.salaryRange?.max,
+                            job?.salaryRange?.currency
                           )}
                         </p>
                       </div>

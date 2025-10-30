@@ -8,11 +8,13 @@ import { Questionnaire } from './Questionnaire';
 interface ApplicationOverviewProps {
   application: any;
   onStatusChange?: (status: string) => void;
+  pendingStatus?: string | null;
 }
 
 const ApplicationOverview: React.FC<ApplicationOverviewProps> = ({ 
   application, 
-  onStatusChange 
+  onStatusChange,
+  pendingStatus
 }) => {
   return (
     <div className="p-6 space-y-8">
@@ -23,6 +25,7 @@ const ApplicationOverview: React.FC<ApplicationOverviewProps> = ({
           job={application.job}
           status={application.status}
           onStatusChange={onStatusChange}
+          pendingStatus={pendingStatus}
           isGuestApplication={application.isGuestApplication}
         />
       </div>

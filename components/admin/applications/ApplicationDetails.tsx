@@ -20,11 +20,13 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const updateStatusMutation = useUpdateApplicationStatus();
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const createEventMutation = useCreateEvent();
   const createEvaluationMutation = useCreateEvaluation();
 
   const handleStatusChange = async (status: string) => {
     try {
+      setPendingStatus(status);
       await updateStatusMutation.mutateAsync({
         id: application._id,
         data: { status }
@@ -32,6 +34,8 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
       onStatusChange?.(status);
     } catch (error) {
       console.error('Failed to update status:', error);
+    } finally {
+      setPendingStatus(null);
     }
   };
 
@@ -77,6 +81,7 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
               <ApplicationOverview 
                 application={application}
                 onStatusChange={handleStatusChange}
+                pendingStatus={pendingStatus}
               />
             )}
             

@@ -121,7 +121,7 @@ const Navbar: React.FC<NavbarProps> = ({ title = 'Recruitment Platform' }) => {
                       if (user?.role === 'admin') {
                         window.location.href = '/admin/settings';
                       } else {
-                        window.location.href = '/candidate/profile';
+                        window.location.href = '/candidate/settings';
                       }
                     }}
                   >

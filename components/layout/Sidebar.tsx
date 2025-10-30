@@ -36,6 +36,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       icon: Briefcase,
     },
     {
+      name: 'Candidates',
+      href: '/admin/candidates',
+      icon: Users,
+    },
+    {
       name: 'All Applications',
       href: '/admin/applications',
       icon: Users,

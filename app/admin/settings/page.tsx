@@ -8,6 +8,8 @@ import { EmailTemplatesManager } from '@/components/admin/settings/EmailTemplate
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useAlert } from '@/hooks/useAlert';
+import api from '@/lib/axios';
+import Link from 'next/link';
 import { 
   User, 
   Lock, 
@@ -113,13 +115,16 @@ const AdminSettingsPage: React.FC = () => {
         return;
       }
       
-      // TODO: Implement API call to update password
-      console.log('Updating password');
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      showSuccess('Success', 'Password updated successfully');
+      const res = await api.put('/auth/change-password', {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      const msg = (res as any)?.data?.message || 'Password updated successfully';
+      showSuccess('Success', msg);
     } catch (error) {
       console.error('Password update error:', error);
-      showError('Error', 'Failed to update password');
+      const msg = (error as any)?.response?.data?.message || 'Failed to update password';
+      showError('Error', msg);
     } finally {
       setLoading(false);
     }
@@ -148,15 +153,13 @@ const AdminSettingsPage: React.FC = () => {
           <div className="space-y-6">
             <SettingsSection
               title="Change Password"
-              description="Update your password to keep your account secure"
+              description="For a better experience, manage your password on a dedicated page"
               icon={<Lock className="h-5 w-5 text-blue-600" />}
             >
-              <SettingsForm
-                fields={securityFields}
-                onSubmit={handlePasswordUpdate}
-                isLoading={loading}
-                submitLabel="Update Password"
-              />
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">Go to the secure password page.</p>
+                <a href="/admin/settings/security/change-password" className="text-sm text-indigo-600 hover:underline">Open Change Password →</a>
+              </div>
             </SettingsSection>
 
             <SettingsSection
@@ -329,7 +332,9 @@ const AdminSettingsPage: React.FC = () => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-2">Manage your account and system preferences</p>
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-gray-600">Manage your account and system preferences</p>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

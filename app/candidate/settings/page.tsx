@@ -7,6 +7,8 @@ import { SettingsForm } from '@/components/settings/SettingsForm';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useAlert } from '@/hooks/useAlert';
+import Link from 'next/link';
+import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
 import { 
   User, 
   Lock, 
@@ -25,6 +27,7 @@ const CandidateSettingsPage: React.FC = () => {
   const tabs = [
     { id: 'account', label: 'Account', icon: User },
     { id: 'security', label: 'Security', icon: Lock },
+    { id: 'change-password', label: 'Change Password', icon: Lock },
     { id: 'privacy', label: 'Privacy', icon: Shield },
     { id: 'notifications', label: 'Notifications', icon: Bell },
   ];
@@ -101,25 +104,7 @@ const CandidateSettingsPage: React.FC = () => {
     }
   };
 
-  const handlePasswordUpdate = async (data: Record<string, string>) => {
-    setLoading(true);
-    try {
-      if (data.newPassword !== data.confirmPassword) {
-        showError('Error', 'Passwords do not match');
-        return;
-      }
-      
-      // TODO: Implement API call to update password
-      console.log('Updating password');
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      showSuccess('Success', 'Password updated successfully');
-    } catch (error) {
-      console.error('Password update error:', error);
-      showError('Error', 'Failed to update password');
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -144,15 +129,13 @@ const CandidateSettingsPage: React.FC = () => {
           <div className="space-y-6">
             <SettingsSection
               title="Change Password"
-              description="Update your password to keep your account secure"
+              description="For a better experience, manage your password on a dedicated page"
               icon={<Lock className="h-5 w-5 text-blue-600" />}
             >
-              <SettingsForm
-                fields={securityFields}
-                onSubmit={handlePasswordUpdate}
-                isLoading={loading}
-                submitLabel="Update Password"
-              />
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">Go to the secure password page.</p>
+                <a href="/candidate/settings/security/change-password" className="text-sm text-indigo-600 hover:underline">Open Change Password →</a>
+              </div>
             </SettingsSection>
 
             <SettingsSection
@@ -170,6 +153,17 @@ const CandidateSettingsPage: React.FC = () => {
               </div>
             </SettingsSection>
           </div>
+        );
+
+      case 'change-password':
+        return (
+          <SettingsSection
+            title="Change Password"
+            description="Update your password to keep your account secure"
+            icon={<Lock className="h-5 w-5 text-blue-600" />}
+          >
+            <ChangePasswordForm embedded />
+          </SettingsSection>
         );
 
       case 'privacy':
@@ -305,7 +299,9 @@ const CandidateSettingsPage: React.FC = () => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-2">Manage your account preferences and privacy settings</p>
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-gray-600">Manage your account preferences and privacy settings</p>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
