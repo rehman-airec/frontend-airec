@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { getToken, getUser } from '@/lib/auth';
+import { getToken } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 interface SocketContextType {

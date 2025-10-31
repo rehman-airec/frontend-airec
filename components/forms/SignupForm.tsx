@@ -21,21 +21,24 @@ const signupSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
   role: z.enum(['admin', 'candidate']),
-  firstName: z.string().min(2, 'First name must be at least 2 characters').optional(),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters').optional(),
-  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  name: z.string().optional(),
   phone: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
 }).refine((data) => {
   if (data.role === 'candidate') {
-    return data.firstName && data.lastName;
+    return !!(data.firstName && data.firstName.length >= 2 && data.lastName && data.lastName.length >= 2);
   }
-  return data.name;
+  if (data.role === 'admin') {
+    return !!(data.name && data.name.length >= 2);
+  }
+  return true;
 }, {
-  message: "Required fields are missing",
-  path: ["role"],
+  message: "Required fields are missing for this role",
+  path: ['name'],
 });
 
 type SignupFormData = z.infer<typeof signupSchema>;
@@ -64,6 +67,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const selectedRole = watch('role');
 
   const onSubmit = async (data: SignupFormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form errors:', errors);
     setIsLoading(true);
     try {
       const endpoint = data.role === 'admin' 
@@ -84,6 +89,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
             phone: data.phone,
           };
 
+      console.log('Making API call to:', endpoint, payload);
       const response = await api.post(endpoint, payload);
 
       if (response.data.success) {
@@ -159,20 +165,34 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
           <p className="text-gray-600">Sign up to get started</p>
         </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit, (errors) => {
+          console.log('Form validation errors:', errors);
+          toast.error('Please fill in all required fields');
+        })} className="space-y-4">
+          {Object.keys(errors).length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
+              <strong>Validation errors:</strong> Please fix the errors below before submitting.
+              <ul className="mt-1 list-disc list-inside">
+                {Object.entries(errors).map(([field, err]: [string, any]) => (
+                  <li key={field}>{field}: {err?.message || 'Invalid'}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <Select
             label="Role"
             options={roleOptions}
-            {...register('role')}
+            {...register('role', { required: 'Please select a role' })}
             error={errors.role?.message}
           />
           
           {selectedRole === 'admin' ? (
             <Input
-              label="Full Name"
+              label="Full Name *"
               placeholder="Enter your full name"
-              {...register('name')}
+              {...register('name', { required: 'Full name is required' })}
               error={errors.name?.message}
+              required
             />
           ) : (
             <div className="grid grid-cols-2 gap-4">
@@ -229,6 +249,13 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
             type="submit"
             className="w-full"
             loading={isLoading}
+            onClick={(e) => {
+              console.log('Button clicked');
+              const form = e.currentTarget.closest('form');
+              console.log('Form validity:', form?.checkValidity());
+              console.log('Form errors state:', errors);
+              console.log('Current form values:', watch());
+            }}
           >
             Create Account
           </Button>

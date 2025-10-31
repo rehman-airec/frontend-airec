@@ -113,22 +113,22 @@ const PublishSummaryForm: React.FC<PublishSummaryFormProps> = ({
         <CardContent>
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{jobSummary.title}</h3>
-              <p className="text-gray-600">{jobSummary.department}</p>
+              <h3 className="text-lg font-semibold text-gray-900">{jobSummary.title || 'Untitled Job'}</h3>
+              <p className="text-gray-600">{jobSummary.department || 'No Department'}</p>
               <p className="text-sm text-gray-500">
-                {jobSummary.location.city}, {jobSummary.location.country}
-                {jobSummary.location.remote && ' (Remote)'}
+                {jobSummary.location?.city || ''}, {jobSummary.location?.country || ''}
+                {jobSummary.location?.remote && ' (Remote)'}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Employment Type:</span>
-                <span className="ml-2 text-gray-600">{jobSummary.employmentType}</span>
+                <span className="ml-2 text-gray-600">{jobSummary.employmentType || 'Not specified'}</span>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Experience Level:</span>
-                <span className="ml-2 text-gray-600">{jobSummary.experienceLevel}</span>
+                <span className="ml-2 text-gray-600">{jobSummary.experienceLevel || 'Not specified'}</span>
               </div>
               {jobSummary.salaryRange && (
                 <div className="col-span-2">
@@ -144,12 +144,14 @@ const PublishSummaryForm: React.FC<PublishSummaryFormProps> = ({
               )}
             </div>
 
-            <div>
-              <h4 className="font-medium text-gray-900 mb-2">Description</h4>
-              <p className="text-sm text-gray-600 line-clamp-3">{jobSummary.description}</p>
-            </div>
+            {jobSummary.description && (
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Description</h4>
+                <p className="text-sm text-gray-600 line-clamp-3">{jobSummary.description}</p>
+              </div>
+            )}
 
-            {jobSummary.responsibilities.length > 0 && (
+            {jobSummary.responsibilities && jobSummary.responsibilities.length > 0 && (
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Key Responsibilities</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
@@ -166,7 +168,7 @@ const PublishSummaryForm: React.FC<PublishSummaryFormProps> = ({
               </div>
             )}
 
-            {jobSummary.skills.length > 0 && (
+            {jobSummary.skills && jobSummary.skills.length > 0 && (
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Required Skills</h4>
                 <div className="flex flex-wrap gap-2">
