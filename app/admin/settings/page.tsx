@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SettingsSection } from '@/components/settings/SettingsSection';
 import { SettingsForm } from '@/components/settings/SettingsForm';
@@ -9,7 +9,9 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useAlert } from '@/hooks/useAlert';
 import api from '@/lib/axios';
+import { API_ROUTES } from '@/lib/api-routes';
 import Link from 'next/link';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { 
   User, 
   Lock, 
@@ -24,8 +26,7 @@ import {
 const AdminSettingsPage: React.FC = () => {
   const { user } = useAuth();
   const { showSuccess, showError } = useAlert();
-  const [activeTab, setActiveTab] = useState('account');
-  const [loading, setLoading] = useState(false);
+  const { activeTab, loading, setActiveTab, setLoading } = useSettingsStore();
 
   const tabs = [
     { id: 'account', label: 'Account', icon: User },
@@ -115,7 +116,7 @@ const AdminSettingsPage: React.FC = () => {
         return;
       }
       
-      const res = await api.put('/auth/change-password', {
+      const res = await api.put(API_ROUTES.AUTH.CHANGE_PASSWORD, {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });

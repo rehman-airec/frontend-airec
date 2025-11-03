@@ -41,8 +41,12 @@ const AdminJobViewPage: React.FC = () => {
   const publishJobMutation = usePublishJob();
   const closeJobMutation = useCloseJob();
 
-  const applications = applicationsData?.applications || [];
-  const applicationsPagination = applicationsData?.pagination || { total: 0 };
+  const applications = applicationsData && typeof applicationsData === 'object' && 'applications' in applicationsData
+    ? (applicationsData as { applications: any[] }).applications 
+    : [];
+  const applicationsPagination = applicationsData && typeof applicationsData === 'object' && 'pagination' in applicationsData
+    ? (applicationsData as { pagination: any }).pagination
+    : { total: 0 };
 
   const handleDeleteJob = () => {
     if (!job) return;

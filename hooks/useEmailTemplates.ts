@@ -31,7 +31,7 @@ export const useEmailTemplates = (category?: string) => {
     queryKey: ['emailTemplates', category],
     queryFn: async (): Promise<{ success: boolean; templates: EmailTemplate[] }> => {
       const params = category ? { category } : {};
-      const response = await api.get('/email-templates', { params });
+      const response = await api.get(API_ROUTES.EMAIL_TEMPLATES.LIST, { params });
       return response.data;
     },
   });
@@ -42,7 +42,7 @@ export const useEmailTemplate = (templateId: string) => {
   return useQuery({
     queryKey: ['emailTemplate', templateId],
     queryFn: async (): Promise<{ success: boolean; template: EmailTemplate }> => {
-      const response = await api.get(`/email-templates/${templateId}`);
+      const response = await api.get(API_ROUTES.EMAIL_TEMPLATES.GET_BY_ID(templateId));
       return response.data;
     },
     enabled: !!templateId,
@@ -55,7 +55,7 @@ export const useCreateEmailTemplate = () => {
 
   return useMutation({
     mutationFn: async (data: Partial<EmailTemplate>): Promise<EmailTemplate> => {
-      const response = await api.post('/email-templates', data);
+      const response = await api.post(API_ROUTES.EMAIL_TEMPLATES.CREATE, data);
       return response.data.template;
     },
     onSuccess: () => {
@@ -74,7 +74,7 @@ export const useUpdateEmailTemplate = () => {
 
   return useMutation({
     mutationFn: async ({ templateId, data }: { templateId: string; data: Partial<EmailTemplate> }): Promise<EmailTemplate> => {
-      const response = await api.put(`/email-templates/${templateId}`, data);
+      const response = await api.put(API_ROUTES.EMAIL_TEMPLATES.UPDATE(templateId), data);
       return response.data.template;
     },
     onSuccess: () => {
@@ -93,7 +93,7 @@ export const useDeleteEmailTemplate = () => {
 
   return useMutation({
     mutationFn: async (templateId: string): Promise<void> => {
-      await api.delete(`/email-templates/${templateId}`);
+      await api.delete(API_ROUTES.EMAIL_TEMPLATES.DELETE(templateId));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['emailTemplates'] });

@@ -67,9 +67,16 @@ const DashboardFooter: React.FC<DashboardFooterProps> = ({ role }) => {
             {user && (
               <div className="flex items-center text-sm text-gray-500">
                 <Users className="h-4 w-4 mr-2" />
-                <span>{user.name || user.firstName || 'User'}</span>
+                <span>
+                  {user.name || (() => {
+                    const firstName = user.firstName || '';
+                    const lastName = user.lastName || '';
+                    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+                    return fullName || 'User';
+                  })()}
+                </span>
                 <span className="mx-1">•</span>
-                <span className="capitalize text-blue-600 font-medium">{user.role}</span>
+                <span className="capitalize text-blue-600 font-medium">{user.role || 'User'}</span>
               </div>
             )}
             <button

@@ -1,7 +1,10 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import { API_ROUTES } from '@/lib/api-routes';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -24,11 +27,13 @@ type CandidateEntry = {
 };
 
 export const BulkCandidatesForm: React.FC = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  
   const [positionTitle, setPositionTitle] = React.useState('');
   const [entries, setEntries] = React.useState<CandidateEntry[]>([
     { firstName: '', lastName: '', email: '', phone: '', experience: '', linkedinUrl: '', positionTitle: '' },
   ]);
-  const [loading, setLoading] = React.useState(false);
 
   const addRow = () => setEntries((arr) => [...arr, { firstName: '', lastName: '', email: '', phone: '', experience: '', linkedinUrl: '', positionTitle: '' }]);
   const removeRow = (idx: number) => setEntries((arr) => arr.filter((_, i) => i !== idx));
@@ -36,26 +41,36 @@ export const BulkCandidatesForm: React.FC = () => {
     setEntries((arr) => arr.map((e, i) => (i === idx ? { ...e, [key]: value } : e)));
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const fd = new FormData();
-      const payload = entries.map((e) => ({ ...e, positionTitle }));
-      fd.append('candidates', JSON.stringify(payload));
-      entries.forEach((e, i) => {
-        if (e.resume) fd.append(`resume_${i}`, e.resume);
-        if (e.coverLetter) fd.append(`coverLetter_${i}`, e.coverLetter);
-      });
-      await api.post('/candidates/admin/bulk-add', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  const addBulkCandidatesMutation = useMutation({
+    mutationFn: async (fd: FormData) => {
+      const response = await api.post(API_ROUTES.CANDIDATES.ADD_BULK, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      return response.data;
+    },
+    onSuccess: () => {
       toast.success('Bulk candidates processed');
+      // Invalidate candidates list to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+      // Reset form
       setEntries([{ firstName: '', lastName: '', email: '', phone: '', experience: '', linkedinUrl: '', positionTitle: '' }]);
       setPositionTitle('');
-    } catch (err: any) {
+      // Redirect to candidates list
+      router.push('/admin/candidates');
+    },
+    onError: (err: any) => {
       toast.error(err?.response?.data?.message || 'Failed to process bulk candidates');
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const fd = new FormData();
+    const payload = entries.map((e) => ({ ...e, positionTitle }));
+    fd.append('candidates', JSON.stringify(payload));
+    entries.forEach((e, i) => {
+      if (e.resume) fd.append(`resume_${i}`, e.resume);
+      if (e.coverLetter) fd.append(`coverLetter_${i}`, e.coverLetter);
+    });
+    addBulkCandidatesMutation.mutate(fd);
   };
 
   return (
@@ -112,7 +127,7 @@ export const BulkCandidatesForm: React.FC = () => {
             ))}
           </div>
           <div className="pt-2">
-            <Button type="submit" loading={loading}>Submit Bulk</Button>
+            <Button type="submit" loading={addBulkCandidatesMutation.isPending}>Submit Bulk</Button>
           </div>
         </form>
       </CardContent>

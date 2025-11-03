@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { useAdminJobTitles } from '@/hooks/useJobs';
 import { useJobApplications } from '@/hooks/useApplications';
 import { ApplicantsTable } from '@/components/admin/applications/ApplicantsTable';
@@ -8,41 +8,63 @@ import { Select } from '@/components/ui/Select';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Pagination } from '@/components/ui/Pagination';
 import { Users, Filter, TrendingUp } from 'lucide-react';
+import { useApplicationStore } from '@/stores/applicationStore';
 
 const AdminApplicationsPage: React.FC = () => {
-  const [selectedJobId, setSelectedJobId] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
+  const {
+    selectedJobId,
+    currentPage,
+    pageSize,
+    setSelectedJobId,
+    setCurrentPage,
+  } = useApplicationStore();
 
-  const { data: jobsData } = useAdminJobTitles();
-  const { data: applicationsData, isLoading } = useJobApplications(
-    selectedJobId || 'all', // Pass 'all' when no job is selected
-    {
-      page: currentPage,
-      limit: pageSize,
-    }
+  // Only fetch job titles once when component mounts (cached for 5 minutes)
+  // This query won't refetch on window focus or component remount
+  const { data: jobsData, isLoading: jobsLoading } = useAdminJobTitles();
+  
+  // Memoize filters to prevent unnecessary re-renders and API calls
+  const filters = useMemo(() => ({
+    page: currentPage,
+    limit: pageSize,
+  }), [currentPage, pageSize]);
+  
+  // Only fetch applications if jobId is valid (including 'all')
+  // Query is cached for 2 minutes and won't refetch unnecessarily
+  // The enabled check ensures we only fetch when we have a valid jobId
+  const { data: applicationsData, isLoading: applicationsLoading, isFetching } = useJobApplications(
+    selectedJobId,
+    filters
   );
 
+  // Only show loading on initial load, not during background refetches
+  const isLoading = applicationsLoading && !applicationsData;
+
   const jobs = jobsData?.jobs || [];
-  const rawApplications = applicationsData?.applications || [];
-  const pagination = applicationsData?.pagination || { current: 1, pages: 1, total: 0 };
+  const rawApplications = applicationsData && typeof applicationsData === 'object' && 'applications' in applicationsData
+    ? (applicationsData as { applications: any[] }).applications 
+    : [];
+  const pagination = applicationsData && typeof applicationsData === 'object' && 'pagination' in applicationsData
+    ? (applicationsData as { pagination: any }).pagination
+    : { current: 1, pages: 1, total: 0 };
 
   // Transform normalized API response back into table-friendly shape
   const applications = rawApplications.map((app: any) => {
     // Backend now returns: { id, name, email, phone, jobTitle, status, appliedAt }
-    const fullName: string = app.name || '';
-    const [firstName, ...rest] = fullName.split(' ');
-    const lastName = rest.join(' ');
+    const fullName: string = app.name || 'Unknown Candidate';
+    const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts[0] || fullName;
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
     return {
       _id: app.id,
       candidate: {
-        firstName: firstName || fullName,
-        lastName: lastName || '',
-        email: app.email || '',
-        phone: app.phone || '',
+        firstName: firstName,
+        lastName: lastName,
+        email: app.email || 'Not provided',
+        phone: app.phone || 'Not provided',
       },
-      status: app.status,
+      status: app.status || 'Unknown',
       appliedAt: app.appliedAt,
       job: { title: app.jobTitle || 'Unknown Job' },
     };
@@ -106,13 +128,18 @@ const AdminApplicationsPage: React.FC = () => {
                 </label>
                 <Select
                   value={selectedJobId}
-                  onChange={(e) => setSelectedJobId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedJobId(e.target.value || 'all');
+                    // Reset to first page when filter changes
+                    setCurrentPage(1);
+                  }}
                   options={[
-                    { value: '', label: 'All Jobs' },
+                    { value: 'all', label: 'All Jobs' },
                     ...jobOptions,
                   ]}
                   placeholder="Select a job to filter"
                   className="w-full max-w-md"
+                  disabled={jobsLoading}
                 />
               </div>
             </div>

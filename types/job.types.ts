@@ -100,6 +100,7 @@ export interface Job {
   status: 'draft' | 'published' | 'closed' | 'archived';
   tags: string[];
   createdBy: string;
+  tenantId?: string | { _id: string } | null;
   createdAt: string;
   updatedAt: string;
 }

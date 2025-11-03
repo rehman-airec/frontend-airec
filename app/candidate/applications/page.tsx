@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useCandidateApplications } from '@/hooks/useApplications';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -10,12 +10,19 @@ import { Pagination } from '@/components/ui/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { formatDate } from '@/lib/utils';
 import { Eye, FileText, Calendar, MapPin } from 'lucide-react';
+import { useRolePath } from '@/hooks/useRolePath';
+import { useApplicationStore } from '@/stores/applicationStore';
 
 const CandidateApplicationsPage: React.FC = () => {
   const router = useRouter();
-  const [statusFilter, setStatusFilter] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
+  const rolePath = useRolePath();
+  const {
+    statusFilter,
+    currentPage,
+    pageSize,
+    setStatusFilter,
+    setCurrentPage,
+  } = useApplicationStore();
 
   const { data: applicationsData, isLoading } = useCandidateApplications({
     page: currentPage,
@@ -23,8 +30,12 @@ const CandidateApplicationsPage: React.FC = () => {
     status: statusFilter || undefined,
   });
 
-  const applications = applicationsData?.applications || [];
-  const pagination = applicationsData?.pagination || { current: 1, pages: 1, total: 0 };
+  const applications = applicationsData && typeof applicationsData === 'object' && 'applications' in applicationsData
+    ? (applicationsData as { applications: any[] }).applications 
+    : [];
+  const pagination = applicationsData && typeof applicationsData === 'object' && 'pagination' in applicationsData
+    ? (applicationsData as { pagination: any }).pagination
+    : { current: 1, pages: 1, total: 0 };
 
   // Debug logging
   console.log('Applications data:', applicationsData);
@@ -151,7 +162,7 @@ const CandidateApplicationsPage: React.FC = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => router.push(`/candidate/applications/${application._id}`)}
+                        onClick={() => router.push(rolePath.applications.detail(application._id))}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
@@ -175,7 +186,7 @@ const CandidateApplicationsPage: React.FC = () => {
                   : 'You haven\'t applied to any jobs yet'
                 }
               </p>
-              <Button onClick={() => window.location.href = '/candidate/jobs/list'}>
+              <Button onClick={() => window.location.href = rolePath.jobs.list}>
                 Browse Jobs
               </Button>
             </CardContent>

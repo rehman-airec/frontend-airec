@@ -5,8 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useJob } from '@/hooks/useJobs';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/Loader';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
+import { RoleBasedHeader } from '@/components/layout/RoleBasedHeader';
+import { RoleBasedFooter } from '@/components/layout/RoleBasedFooter';
 import { JobApplicationFlow } from '@/components/shared';
 import { ArrowLeft } from 'lucide-react';
 
@@ -24,18 +24,20 @@ const PublicJobApplicationPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <PageLoader message="Loading job details..." />
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <RoleBasedHeader />
+        <div className="flex-1 flex items-center justify-center">
+          <PageLoader message="Loading job details..." />
+        </div>
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <RoleBasedHeader />
+        <div className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h1>
             <p className="text-gray-600 mb-6">The job you're looking for doesn't exist or has been removed.</p>
@@ -45,16 +47,16 @@ const PublicJobApplicationPage: React.FC = () => {
             </Button>
           </div>
         </div>
-        <Footer />
+        <RoleBasedFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <RoleBasedHeader />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* Header */}
         <div className="mb-8">
           <Button
@@ -72,7 +74,7 @@ const PublicJobApplicationPage: React.FC = () => {
         <JobApplicationFlow job={job} onSuccess={handleSuccess} />
       </div>
 
-      <Footer />
+      <RoleBasedFooter />
     </div>
   );
 };

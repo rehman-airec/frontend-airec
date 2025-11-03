@@ -10,6 +10,8 @@ export const API_ROUTES = {
     REFRESH: '/auth/refresh',
     LOGOUT: '/auth/logout',
     CHANGE_PASSWORD: '/auth/change-password',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
     ADMIN_LIST: '/auth/admin/list',
   },
   
@@ -47,8 +49,11 @@ export const API_ROUTES = {
   
   // File endpoints
   FILES: {
-    UPLOAD_RESUME: '/files/upload/resume',
+    UPLOAD_RESUME: '/files/resume',
     DOWNLOAD_RESUME: (filename: string) => `/files/resume/${filename}`,
+    FILE_INFO: (filename: string) => `/files/resume/${filename}/info`,
+    LIST: '/files/list',
+    DELETE: (filename: string) => `/files/resume/${filename}`,
   },
   
   // Profile endpoints
@@ -84,11 +89,11 @@ export const API_ROUTES = {
   // Evaluation Templates endpoints
   EVALUATION_TEMPLATES: {
     LIST: '/evaluation-templates',
-    GET_BY_ID: (id: string) => `/evaluation-templates/${id}`,
+    GET_BY_ID: (templateId: string) => `/evaluation-templates/${templateId}`,
     CREATE: '/evaluation-templates',
-    UPDATE: (id: string) => `/evaluation-templates/${id}`,
-    DELETE: (id: string) => `/evaluation-templates/${id}`,
-    INCREMENT_USAGE: (id: string) => `/evaluation-templates/${id}/increment-usage`,
+    UPDATE: (templateId: string) => `/evaluation-templates/${templateId}`,
+    DELETE: (templateId: string) => `/evaluation-templates/${templateId}`,
+    INCREMENT_USAGE: (templateId: string) => `/evaluation-templates/${templateId}/increment-usage`,
   },
 
   // Event endpoints
@@ -107,5 +112,44 @@ export const API_ROUTES = {
     CREATE: '/email-templates',
     UPDATE: (id: string) => `/email-templates/${id}`,
     DELETE: (id: string) => `/email-templates/${id}`,
+  },
+
+  // Tenant endpoints (Multi-tenant support)
+  TENANT: {
+    LIST: '/superadmin/tenants',
+    GET_BY_ID: (id: string) => `/superadmin/tenants/${id}`,
+    CREATE: '/superadmin/create-tenant',
+    UPDATE: (id: string) => `/superadmin/tenants/${id}`,
+    DELETE: (id: string) => `/superadmin/tenants/${id}`,
+    CREATE_USER: '/tenant/create-user',
+    INFO: '/tenant/info',
+    PUBLIC_INFO: '/tenant/public-info',
+  },
+
+  // Employee endpoints (Tenant-scoped employee management)
+  EMPLOYEES: {
+    LIST: '/tenant/users',
+    GET_BY_ID: (id: string) => `/tenant/users/${id}`,
+    CREATE: '/tenant/users',
+    DELETE: (id: string) => `/tenant/users/${id}`,
+    QUOTA: '/tenant/users/stats/quota',
+  },
+
+  // Candidate management endpoints (Admin)
+  CANDIDATES: {
+    ADD_SINGLE: '/candidates/admin/add',
+    ADD_BULK: '/candidates/admin/bulk-add',
+    LIST: '/candidates/admin/list',
+    GET_BY_ID: (id: string) => `/candidates/admin/${id}`,
+    UPDATE: (id: string) => `/candidates/admin/${id}`,
+    DELETE: (id: string) => `/candidates/admin/${id}`,
+  },
+
+  // Guest application endpoints
+  GUEST: {
+    APPLY: (jobId: string) => `/guest/jobs/${jobId}/apply/guest`,
+    TRACK: (trackingToken: string) => `/guest/track/${trackingToken}`,
+    BY_EMAIL: (email: string) => `/guest/applications/${email}`,
+    CONVERT_TO_USER: '/guest/convert-to-user',
   },
 } as const;

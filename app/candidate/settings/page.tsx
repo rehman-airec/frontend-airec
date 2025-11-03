@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SettingsSection } from '@/components/settings/SettingsSection';
 import { SettingsForm } from '@/components/settings/SettingsForm';
@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { useAlert } from '@/hooks/useAlert';
 import Link from 'next/link';
 import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { 
   User, 
   Lock, 
@@ -21,8 +22,7 @@ import {
 const CandidateSettingsPage: React.FC = () => {
   const { user } = useAuth();
   const { showSuccess, showError } = useAlert();
-  const [activeTab, setActiveTab] = useState('account');
-  const [loading, setLoading] = useState(false);
+  const { activeTab, loading, setActiveTab, setLoading } = useSettingsStore();
 
   const tabs = [
     { id: 'account', label: 'Account', icon: User },

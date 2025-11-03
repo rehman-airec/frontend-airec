@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { API_ROUTES } from '@/lib/api-routes';
+import { extractSubdomain } from '@/lib/tenantUtils';
 import { 
   Application, 
   ApplicationWithJob, 
@@ -33,7 +34,10 @@ export const useJobApplications = (jobId: string, filters: ApplicationFilters = 
       const response = await api.get(API_ROUTES.JOBS.APPLICATIONS(jobId), { params: filters });
       return response.data;
     },
-    enabled: !!jobId,
+    enabled: !!jobId && jobId !== '', // Only fetch if jobId is valid
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes (longer to prevent repeated calls)
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    retry: 1, // Only retry once on failure
   });
 };
 
@@ -183,8 +187,47 @@ export const useApplicationStats = () => {
   return useQuery({
     queryKey: ['application-stats'],
     queryFn: async (): Promise<ApplicationStats> => {
-      const response = await api.get(API_ROUTES.APPLICATIONS.ADMIN_STATS);
-      return response.data.stats;
+      // In development, use Next.js API proxy to bypass CORS issues
+      const useProxy = process.env.NODE_ENV === 'development';
+      const endpoint = useProxy ? '/api/applications/admin/stats' : API_ROUTES.APPLICATIONS.ADMIN_STATS;
+      
+      // For proxy routes, use fetch directly to avoid baseURL prepending
+      if (useProxy && endpoint.startsWith('/api/')) {
+        const subdomain = typeof window !== 'undefined' 
+          ? extractSubdomain(window.location.hostname)
+          : null;
+        
+        const token = typeof window !== 'undefined' 
+          ? localStorage.getItem('token')
+          : null;
+        
+        const headers: Record<string, string> = {
+          'x-tenant-subdomain': subdomain || '',
+          'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const fetchResponse = await fetch(endpoint, {
+          method: 'GET',
+          headers,
+          credentials: 'include',
+        });
+        
+        if (!fetchResponse.ok) {
+          const errorText = await fetchResponse.text();
+          throw { response: { status: fetchResponse.status, data: { message: errorText } } };
+        }
+        
+        const data = await fetchResponse.json();
+        return data.stats;
+      } else {
+        // Use axios for backend routes
+        const response = await api.get(API_ROUTES.APPLICATIONS.ADMIN_STATS);
+        return response.data.stats;
+      }
     },
   });
 };

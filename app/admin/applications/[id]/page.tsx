@@ -79,12 +79,13 @@ const ApplicationDetailsPage: React.FC = () => {
               <div>
                 {(() => {
                   const candidate = (application as any).candidate || application.candidateSnapshot;
-                  const firstName = candidate?.firstName || 'Unknown';
+                  const firstName = candidate?.firstName || '';
                   const lastName = candidate?.lastName || '';
+                  const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'Unknown Candidate';
                   return (
                     <>
                       <h1 className="text-2xl font-bold text-gray-900">
-                        {firstName} {lastName}
+                        {fullName}
                       </h1>
                       <p className="text-gray-600">
                         {application.job?.title || 'Unknown Position'}

@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useJob } from '@/hooks/useJobs';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/Loader';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
+import { RoleBasedHeader } from '@/components/layout/RoleBasedHeader';
+import { RoleBasedFooter } from '@/components/layout/RoleBasedFooter';
 import { JobDetails, JobSidebar } from '@/components/shared';
+import { TenantContextGuard, TenantJobErrorHandler } from '@/components/jobs';
 import { ArrowLeft, MapPin, Building2, Users, DollarSign, Calendar } from 'lucide-react';
 import { formatSalaryRange, formatDate } from '@/lib/utils';
 
@@ -17,22 +18,37 @@ const PublicJobDetailsPage: React.FC = () => {
   const router = useRouter();
   const jobId = params.jobId as string;
 
-  const { data: job, isLoading } = useJob(jobId);
+  const { data: job, isLoading, error } = useJob(jobId);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <PageLoader message="Loading job details..." />
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <RoleBasedHeader />
+        <div className="flex-1 flex items-center justify-center">
+          <PageLoader message="Loading job details..." />
+        </div>
+      </div>
+    );
+  }
+
+  // Handle errors (403 Forbidden for cross-tenant access, 404 Not Found, etc.)
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <RoleBasedHeader />
+        <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+          <TenantJobErrorHandler error={error} jobId={jobId} />
+        </div>
+        <RoleBasedFooter />
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <RoleBasedHeader />
+        <div className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h1>
             <p className="text-gray-600 mb-6">The job you're looking for doesn't exist or has been removed.</p>
@@ -42,16 +58,17 @@ const PublicJobDetailsPage: React.FC = () => {
             </Button>
           </div>
         </div>
-        <Footer />
+        <RoleBasedFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-4">
+    <TenantContextGuard requireTenant={false}>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <RoleBasedHeader />
+        
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-4">
         {/* Header */}
         <div className="mb-8">
           <Button
@@ -156,13 +173,14 @@ const PublicJobDetailsPage: React.FC = () => {
         </div>
 
         {/* Main Content - Job Description Only */}
-        <div className="max-w-7xl mx-auto">
+        <div className="flex-1 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-4 w-full">
           <JobDetails job={job} showApplyButton={false} showHeader={false} />
         </div>
-      </div>
+        </div>
 
-      <Footer />
-    </div>
+        <RoleBasedFooter />
+      </div>
+    </TenantContextGuard>
   );
 };
 

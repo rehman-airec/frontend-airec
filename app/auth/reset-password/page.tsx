@@ -1,25 +1,35 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
+import { API_ROUTES } from '@/lib/api-routes';
 import Link from 'next/link';
 import { useAlert } from '@/hooks/useAlert';
+import { useAuthFormsStore } from '@/stores/authFormsStore';
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [token, setToken] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    token,
+    newPassword,
+    confirmPassword,
+    submitting,
+    message,
+    error,
+    resetToken,
+    setResetNewPassword,
+    setResetConfirmPassword,
+    setSubmitting,
+    setMessage,
+    setError,
+  } = useAuthFormsStore();
   const { showSuccess, showError } = useAlert();
 
   useEffect(() => {
     const t = searchParams.get('token');
-    if (t) setToken(t);
-  }, [searchParams]);
+    if (t) resetToken(t);
+  }, [searchParams, resetToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +45,7 @@ export default function ResetPasswordPage() {
     }
     setSubmitting(true);
     try {
-      await api.post('/auth/reset-password', { token, newPassword });
+      await api.post(API_ROUTES.AUTH.RESET_PASSWORD, { token, newPassword });
       setMessage('Password reset successful. Redirecting to login…');
       showSuccess('Success', 'Password reset successful');
       setTimeout(() => router.push('/auth/login'), 1500);
@@ -61,7 +71,7 @@ export default function ResetPasswordPage() {
               type="password"
               required
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => setResetNewPassword(e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               placeholder="••••••••"
             />
@@ -73,7 +83,7 @@ export default function ResetPasswordPage() {
               type="password"
               required
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => setResetConfirmPassword(e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               placeholder="••••••••"
             />
@@ -93,6 +103,28 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-md bg-white shadow rounded-lg p-6">
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+            <div className="space-y-4">
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ResetPasswordPageContent />
+    </Suspense>
   );
 }
 

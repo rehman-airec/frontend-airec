@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useUpdateProfile, useProfileStats } from '@/hooks/useProfile';
@@ -16,6 +16,7 @@ import { ProfileSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 import { formatDate } from '@/lib/utils';
 import api from '@/lib/axios';
 import { API_ROUTES } from '@/lib/api-routes';
+import { useProfileStore } from '@/stores/profileStore';
 import { 
   FileText, 
   Download, 
@@ -33,9 +34,14 @@ const CandidateProfilePage: React.FC = () => {
   const { user } = useAuth();
   const router = useRouter();
   const { showSuccess, showError } = useAlert();
-  const [isEditing, setIsEditing] = useState(false);
-  const [showResumeModal, setShowResumeModal] = useState(false);
-  const [resumeUploading, setResumeUploading] = useState(false);
+  const {
+    isEditing,
+    showResumeModal,
+    resumeUploading,
+    setIsEditing,
+    setShowResumeModal,
+    setResumeUploading,
+  } = useProfileStore();
   
   // API Hooks
   const { data: profile, isLoading: profileLoading, error: profileError } = useProfile();
@@ -61,7 +67,9 @@ const CandidateProfilePage: React.FC = () => {
   } : null;
 
   // Recent applications from API
-  const applications = applicationsData?.applications?.map(app => ({
+  const applications = (applicationsData && typeof applicationsData === 'object' && 'applications' in applicationsData
+    ? (applicationsData as { applications: any[] }).applications 
+    : []).map((app: any) => ({
     id: app._id,
     jobTitle: app.job?.title || 'Unknown Position',
     company: app.job?.department || 'Unknown Company', // Use department as company for now

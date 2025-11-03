@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { JobCard } from '@/components/shared/JobCard';
@@ -9,11 +9,20 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { Heart, Briefcase, ArrowLeft, Search } from 'lucide-react';
+import { useRolePath } from '@/hooks/useRolePath';
+import { useUIStore } from '@/stores/uiStore';
 
 const SavedJobsPage: React.FC = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(12);
+  const rolePath = useRolePath();
+  const { formData, setFormData } = useUIStore();
+  const currentPage = formData['saved-jobs-page'] || 1;
+  const pageSize = 12;
+
+  const setCurrentPage = (page: number) => {
+    setFormData('saved-jobs-page', page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const { data: savedJobsData, isLoading, error } = useSavedJobs({
     page: currentPage,
@@ -25,15 +34,14 @@ const SavedJobsPage: React.FC = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleApply = (jobId: string) => {
-    router.push(`/candidate/jobs/apply/${jobId}`);
+    router.push(rolePath.jobs.apply(jobId));
   };
 
   const handleView = (jobId: string) => {
-    router.push(`/candidate/jobs/${jobId}`);
+    router.push(rolePath.jobs.view(jobId));
   };
 
   // Loading state

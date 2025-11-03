@@ -12,7 +12,8 @@ import { TemplateCardSkeleton } from '@/components/ui/Skeleton';
 import { Plus, Search, BookOpen } from 'lucide-react';
 
 const AdminScreeningTemplatesPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState(''); // What user types
+  const [searchQuery, setSearchQuery] = useState(''); // What's actually used for searching
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ScreeningTemplate | null>(null);
   
@@ -57,10 +58,33 @@ const AdminScreeningTemplatesPage: React.FC = () => {
               <Search className="h-5 w-5 text-gray-400" />
               <Input
                 placeholder="Search templates by name, description, or questions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchQuery(searchInput);
+                  }
+                }}
                 className="flex-1"
               />
+              <Button
+                onClick={() => setSearchQuery(searchInput)}
+                variant="outline"
+              >
+                Search
+              </Button>
+              {searchInput && (
+                <Button
+                  onClick={() => {
+                    setSearchInput('');
+                    setSearchQuery('');
+                  }}
+                  variant="ghost"
+                  size="sm"
+                >
+                  Clear
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

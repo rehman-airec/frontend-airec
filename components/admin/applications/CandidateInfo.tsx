@@ -60,7 +60,12 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">
-                    {candidate?.firstName || 'Unknown'} {candidate?.lastName || ''}
+                    {(() => {
+                      const firstName = candidate?.firstName || '';
+                      const lastName = candidate?.lastName || '';
+                      const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+                      return fullName || 'Unknown Candidate';
+                    })()}
                   </h2>
                   {isGuestApplication && (
                     <div className="flex items-center mt-1 space-x-2">

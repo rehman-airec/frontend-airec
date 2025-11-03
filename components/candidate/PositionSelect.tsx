@@ -11,6 +11,8 @@ interface PositionSelectProps {
 
 export const PositionSelect: React.FC<PositionSelectProps> = ({ label = 'Position Title', value, onChange }) => {
   const { data, isLoading } = useAdminJobTitles();
+  
+  // Prevent unnecessary refetches - this component might re-render frequently
   const jobs = data?.jobs || [];
 
   return (

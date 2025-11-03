@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { createContext, useContext } from 'react';
 import { User } from '@/types/user.types';
-import { isAuthenticated, getUser, setUser, removeUser, logout } from '@/lib/auth';
+import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -28,39 +29,22 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUserState] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const {
+    user,
+    isLoading,
+    isAuthenticated,
+    login,
+    logout: logoutStore,
+    initialize,
+  } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is authenticated on mount
-    const checkAuth = () => {
-      if (isAuthenticated()) {
-        const userData = getUser();
-        if (userData) {
-          setUserState(userData);
-        }
-      }
-      setIsLoading(false);
-      setIsInitialized(true);
-    };
-
-    if (!isInitialized) {
-      checkAuth();
-    }
-  }, [isInitialized]);
-
-  const login = (userData: User, token: string) => {
-    setUser(userData);
-    setUserState(userData);
-    setIsLoading(false);
-  };
+    initialize();
+  }, [initialize]);
 
   const handleLogout = () => {
-    removeUser();
-    setUserState(null);
-    logout();
+    logoutStore();
     router.push('/auth/login');
   };
 
@@ -69,7 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     login,
     logout: handleLogout,
-    isAuthenticated: !!user,
+    isAuthenticated,
   };
 
   return (

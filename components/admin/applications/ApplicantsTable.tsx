@@ -8,16 +8,16 @@ import { formatDate } from '@/lib/utils';
 
 interface Applicant {
   _id: string;
-  candidate: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
+  candidate?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
   };
-  status: string;
-  appliedAt: string;
-  job: {
-    title: string;
+  status?: string;
+  appliedAt?: string;
+  job?: {
+    title?: string;
   };
 }
 
@@ -56,16 +56,22 @@ const ApplicantsTable: React.FC<ApplicantsTableProps> = ({ applicants, isLoading
     { header: 'Applied Date', accessor: 'appliedDate' },
   ];
 
-  const data = applicants.map((applicant: Applicant) => ({
-    id: applicant._id,
-    name: `${applicant.candidate.firstName} ${applicant.candidate.lastName}`,
-    email: applicant.candidate.email,
-    phone: applicant.candidate.phone,
-    jobTitle: applicant.job.title,
-    status: applicant.status,
-    appliedDate: formatDate(applicant.appliedAt),
-    _original: applicant,
-  }));
+  const data = applicants.map((applicant: Applicant) => {
+    const firstName = applicant.candidate?.firstName || '';
+    const lastName = applicant.candidate?.lastName || '';
+    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'Unknown Candidate';
+    
+    return {
+      id: applicant._id,
+      name: fullName,
+      email: applicant.candidate?.email || 'Not provided',
+      phone: applicant.candidate?.phone || 'Not provided',
+      jobTitle: applicant.job?.title || 'Unknown Job',
+      status: applicant.status || 'Unknown',
+      appliedDate: formatDate(applicant.appliedAt || new Date()),
+      _original: applicant,
+    };
+  });
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

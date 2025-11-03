@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { JobDetailsForm } from '@/components/forms/JobDetailsForm';
 import { ScreeningQuestionsManager } from '@/components/forms/ScreeningQuestionsManager';
@@ -9,7 +9,9 @@ import { PublishSummaryForm } from '@/components/forms/PublishSummaryForm';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useCreateJob, usePublishJob } from '@/hooks/useJobs';
 import { useGlobalAlert } from '@/providers/AlertProvider';
+import { TenantContextGuard } from '@/components/jobs';
 import { CheckCircle } from 'lucide-react';
+import { useJobStore } from '@/stores/jobStore';
 
 interface JobData {
   title: string;
@@ -66,17 +68,14 @@ interface JobData {
 const CreateJobPage: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError } = useGlobalAlert();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [jobData, setJobData] = useState<Partial<JobData>>({
-    jobFunctions: [],
-    toolsTechnologies: [],
-    educationCertifications: [],
-    skills: [],
-    screeningQuestions: [],
-    hiringTeam: [],
-    workflow: ['New', 'In Review', 'Interview', 'Offer', 'Hired', 'Rejected']
-  });
-  const [jobId, setJobId] = useState<string | null>(null);
+  const {
+    currentStep,
+    jobData,
+    jobId,
+    setCurrentStep,
+    setJobData,
+    setJobId,
+  } = useJobStore();
 
   const createJobMutation = useCreateJob();
   const publishJobMutation = usePublishJob();
@@ -262,8 +261,9 @@ const CreateJobPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto">
+    <TenantContextGuard>
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Create New Job</h1>
@@ -336,6 +336,7 @@ const CreateJobPage: React.FC = () => {
         {renderCurrentStep()}
       </div>
     </div>
+    </TenantContextGuard>
   );
 };
 

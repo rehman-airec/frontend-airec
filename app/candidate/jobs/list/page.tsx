@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useJobs } from '@/hooks/useJobs';
 import { JobFilter } from '@/components/shared/JobFilter';
@@ -12,6 +12,8 @@ import { JobFilters } from '@/types/job.types';
 import { ClockIcon, MapPin, Search, Building2, Clock, DollarSign, Users, Heart } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { useIsJobSaved, useToggleSaveJob } from '@/hooks/useSavedJobs';
+import { useRolePath } from '@/hooks/useRolePath';
+import { useJobStore } from '@/stores/jobStore';
 
 // Save Job Button Component
 const SaveJobButton: React.FC<{ jobId: string }> = ({ jobId }) => {
@@ -42,13 +44,16 @@ const SaveJobButton: React.FC<{ jobId: string }> = ({ jobId }) => {
 };
 
 const CandidateJobsListPage: React.FC = () => {
-  const [filters, setFilters] = useState<JobFilters>({
-    page: 1,
-    limit: 12,
-  });
   const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
+  const rolePath = useRolePath();
+  const {
+    filters,
+    setFilters,
+    isNavigating,
+    applyingJobId,
+    setIsNavigating,
+    setApplyingJobId,
+  } = useJobStore();
 
   const { data: jobsData, isLoading, refetch } = useJobs(filters);
 
@@ -117,7 +122,7 @@ const CandidateJobsListPage: React.FC = () => {
   const handleApply = (jobId: string) => {
     setApplyingJobId(jobId);
     setIsNavigating(true);
-    router.push(`/candidate/jobs/apply/${jobId}`);
+    router.push(rolePath.jobs.apply(jobId));
     
     // Clear loading state after a timeout to prevent stuck loading state
     setTimeout(() => {
@@ -133,12 +138,18 @@ const CandidateJobsListPage: React.FC = () => {
 
   const handleView = (jobId: string) => {
     // Navigate to job details
-    window.location.href = `/candidate/jobs/${jobId}`;
+    window.location.href = rolePath.jobs.view(jobId);
   };
 
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Available Jobs</h1>
+          <p className="text-gray-600 mt-2">Browse and apply for open positions</p>
+        </div>
+
         {/* Search and Filters */}
         <div className="mb-8">
           <JobFilter

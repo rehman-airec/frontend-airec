@@ -1,89 +1,26 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useJobs } from '@/hooks/useJobs';
-import { JobFilter, JobsList, JobsHeader } from '@/components/shared';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
-import { JobFilters } from '@/types/job.types';
+import React from 'react';
+import { RoleBasedHeader } from '@/components/layout/RoleBasedHeader';
+import { RoleBasedFooter } from '@/components/layout/RoleBasedFooter';
+import { TenantAwareJobsList } from '@/components/jobs';
 
+/**
+ * Public Jobs Page
+ * 
+ * Displays jobs filtered by tenant subdomain.
+ * Shows appropriate message if no tenant context is detected.
+ */
 const PublicJobsPage: React.FC = () => {
-  const [filters, setFilters] = useState<JobFilters>({
-    page: 1,
-    limit: 20,
-  });
-
-  const { data: jobsData, isLoading, refetch } = useJobs(filters);
-
-  const jobs = jobsData?.jobs || [];
-  const pagination = jobsData?.pagination || { current: 1, pages: 1, total: 0 };
-
-  // Extract unique departments from jobs
-  const departments = useMemo(() => {
-    const deptSet = new Set<string>();
-    jobs.forEach(job => {
-      if (job.department && job.department.trim()) {
-        deptSet.add(job.department.trim());
-      }
-    });
-    return Array.from(deptSet).sort();
-  }, [jobs]);
-
-  const handleFiltersChange = (newFilters: JobFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handleSearch = () => {
-    refetch();
-  };
-
-  const handleClearFilters = () => {
-    setFilters({
-      page: 1,
-      limit: 20,
-    });
-    refetch();
-  };
-
-  const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <RoleBasedHeader />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Search and Filters */}
-        <div className="mb-6">
-          <JobFilter
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            onSearch={handleSearch}
-            onClear={handleClearFilters}
-            isLoading={isLoading}
-            departments={departments}
-          />
-        </div>
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        {/* Tenant-Aware Jobs List */}
+        <TenantAwareJobsList />
 
-        {/* Results Header */}
-        <JobsHeader
-          pagination={pagination}
-          filters={filters}
-          isLoading={isLoading}
-        />
-
-        {/* Jobs List */}
-        <JobsList
-          jobs={jobs}
-          isLoading={isLoading}
-          pagination={pagination}
-          filters={filters}
-          onPageChange={handlePageChange}
-          onClearFilters={handleClearFilters}
-        />
-
-        {/* Call to Action */}
+        {/* Call to Action - Only show if tenant context exists */}
         <div className="mt-12 bg-blue-50 rounded-lg p-6 text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-3">
             Ready to Apply?
@@ -107,7 +44,7 @@ const PublicJobsPage: React.FC = () => {
         </div>
       </div>
 
-      <Footer />
+      <RoleBasedFooter />
     </div>
   );
 };

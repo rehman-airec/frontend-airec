@@ -2,10 +2,12 @@
 
 import React from 'react';
 import api from '@/lib/axios';
+import { API_ROUTES } from '@/lib/api-routes';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Eye, EyeOff, Shield, CheckCircle2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface ChangePasswordFormProps {
   title?: string;
@@ -26,13 +28,23 @@ const ChangePasswordFormInner: React.FC<ChangePasswordFormProps> = ({
   embedded = false,
 }) => {
   // Use toast notifications instead of modal alerts
-  const [currentPassword, setCurrentPassword] = React.useState('');
-  const [newPassword, setNewPassword] = React.useState('');
-  const [confirmPassword, setConfirmPassword] = React.useState('');
-  const [submitting, setSubmitting] = React.useState(false);
-  const [showCurrent, setShowCurrent] = React.useState(false);
-  const [showNew, setShowNew] = React.useState(false);
-  const [showConfirm, setShowConfirm] = React.useState(false);
+  const {
+    currentPassword,
+    newPassword,
+    confirmPassword,
+    submitting,
+    showCurrent,
+    showNew,
+    showConfirm,
+    setCurrentPassword,
+    setNewPassword,
+    setConfirmPassword,
+    setSubmitting,
+    setShowCurrent,
+    setShowNew,
+    setShowConfirm,
+    resetPasswordForm,
+  } = useSettingsStore();
 
   const passwordStrength = React.useMemo(() => {
     let score = 0;
@@ -64,13 +76,11 @@ const ChangePasswordFormInner: React.FC<ChangePasswordFormProps> = ({
     }
     setSubmitting(true);
     try {
-      const res = await api.put('/auth/change-password', {
+      const res = await api.put(API_ROUTES.AUTH.CHANGE_PASSWORD, {
         currentPassword,
         newPassword,
       });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      resetPasswordForm();
       const msg = res?.data?.message || 'Password updated successfully';
       toast.success(msg);
     } catch (err: any) {
@@ -94,7 +104,7 @@ const ChangePasswordFormInner: React.FC<ChangePasswordFormProps> = ({
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                 required
               />
-              <button type="button" onMouseDown={(e)=>e.preventDefault()} onClick={() => setShowCurrent((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
+              <button type="button" onMouseDown={(e)=>e.preventDefault()} onClick={() => setShowCurrent(!showCurrent)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
                 {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
@@ -112,7 +122,7 @@ const ChangePasswordFormInner: React.FC<ChangePasswordFormProps> = ({
                 required
                 minLength={6}
               />
-              <button type="button" onMouseDown={(e)=>e.preventDefault()} onClick={() => setShowNew((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
+              <button type="button" onMouseDown={(e)=>e.preventDefault()} onClick={() => setShowNew(!showNew)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
                 {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
@@ -155,7 +165,7 @@ const ChangePasswordFormInner: React.FC<ChangePasswordFormProps> = ({
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                 required
               />
-              <button type="button" onMouseDown={(e)=>e.preventDefault()} onClick={() => setShowConfirm((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
+              <button type="button" onMouseDown={(e)=>e.preventDefault()} onClick={() => setShowConfirm(!showConfirm)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>

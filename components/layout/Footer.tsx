@@ -108,9 +108,16 @@ const Footer: React.FC = () => {
             {user && (
               <div className="flex items-center text-sm text-gray-500">
                 <Users className="h-4 w-4 mr-2" />
-                <span>Welcome, {user.name || user.firstName || 'User'}</span>
+                <span>Welcome, {
+                  user.name || (() => {
+                    const firstName = user.firstName || '';
+                    const lastName = user.lastName || '';
+                    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+                    return fullName || 'User';
+                  })()
+                }</span>
                 <span className="mx-2">•</span>
-                <span className="capitalize">{user.role}</span>
+                <span className="capitalize">{user.role || 'User'}</span>
               </div>
             )}
           </div>

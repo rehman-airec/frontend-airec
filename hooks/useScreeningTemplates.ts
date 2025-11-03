@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import { API_ROUTES } from '@/lib/api-routes';
 import toast from 'react-hot-toast';
 
 export interface ScreeningQuestion {
@@ -37,14 +38,20 @@ export const useScreeningTemplates = (filters: ScreeningTemplateFilters = {}) =>
   return useQuery({
     queryKey: ['screening-templates', filters],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (filters.page) params.append('page', filters.page.toString());
-      if (filters.limit) params.append('limit', filters.limit.toString());
-      if (filters.search) params.append('search', filters.search);
-      if (filters.includeDefaults !== undefined) params.append('includeDefaults', filters.includeDefaults.toString());
-      if (filters.tags?.length) filters.tags.forEach(tag => params.append('tags', tag));
-
-      const response = await api.get(`/screening-templates?${params}`);
+      const params: Record<string, string> = {};
+      if (filters.page) params.page = filters.page.toString();
+      if (filters.limit) params.limit = filters.limit.toString();
+      if (filters.search) params.search = filters.search;
+      if (filters.includeDefaults !== undefined) params.includeDefaults = filters.includeDefaults.toString();
+      if (filters.tags?.length) {
+        // Handle array params properly
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => queryParams.append(key, value));
+        filters.tags.forEach(tag => queryParams.append('tags', tag));
+        const response = await api.get(`${API_ROUTES.SCREENING_TEMPLATES.LIST}?${queryParams.toString()}`);
+        return response.data;
+      }
+      const response = await api.get(API_ROUTES.SCREENING_TEMPLATES.LIST, { params });
       return response.data;
     },
   });
@@ -55,7 +62,7 @@ export const useScreeningTemplate = (id: string) => {
   return useQuery({
     queryKey: ['screening-template', id],
     queryFn: async () => {
-      const response = await api.get(`/screening-templates/${id}`);
+      const response = await api.get(API_ROUTES.SCREENING_TEMPLATES.GET_BY_ID(id));
       return response.data.template;
     },
     enabled: !!id,
@@ -68,7 +75,7 @@ export const useCreateScreeningTemplate = () => {
 
   return useMutation({
     mutationFn: async (data: { name: string; description?: string; questions: ScreeningQuestion[]; tags?: string[] }) => {
-      const response = await api.post('/screening-templates', data);
+      const response = await api.post(API_ROUTES.SCREENING_TEMPLATES.CREATE, data);
       return response.data;
     },
     onSuccess: () => {
@@ -87,7 +94,7 @@ export const useUpdateScreeningTemplate = () => {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Omit<ScreeningTemplate, '_id'>> }) => {
-      const response = await api.put(`/screening-templates/${id}`, data);
+      const response = await api.put(API_ROUTES.SCREENING_TEMPLATES.UPDATE(id), data);
       return response.data;
     },
     onSuccess: () => {
@@ -106,7 +113,7 @@ export const useDeleteScreeningTemplate = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await api.delete(`/screening-templates/${id}`);
+      const response = await api.delete(API_ROUTES.SCREENING_TEMPLATES.DELETE(id));
       return response.data;
     },
     onSuccess: () => {
@@ -125,7 +132,7 @@ export const useIncrementTemplateUsage = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await api.post(`/screening-templates/${id}/increment-usage`);
+      const response = await api.post(API_ROUTES.SCREENING_TEMPLATES.INCREMENT_USAGE(id));
       return response.data;
     },
     onSuccess: () => {

@@ -102,13 +102,19 @@ const Navbar: React.FC<NavbarProps> = ({ title = 'Recruitment Platform' }) => {
                   </div>
                   <div className="hidden sm:block">
                     <p className="text-sm font-medium text-gray-900">
-                      {user?.role === 'admin' 
-                        ? user.name 
-                        : `${user?.firstName} ${user?.lastName}`
-                      }
+                      {(() => {
+                        if (user?.role === 'admin') {
+                          return user.name || 'Admin';
+                        } else {
+                          const firstName = user?.firstName || '';
+                          const lastName = user?.lastName || '';
+                          const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+                          return fullName || 'User';
+                        }
+                      })()}
                     </p>
                     <p className="text-xs text-gray-500 capitalize">
-                      {user?.role}
+                      {user?.role || 'User'}
                     </p>
                   </div>
                 </div>

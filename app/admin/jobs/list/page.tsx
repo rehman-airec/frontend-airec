@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useAdminJobs, usePublishJob, useDeleteJob } from '@/hooks/useJobs';
 import { NormalizedAdminJob } from '@/types/job.types';
@@ -13,12 +13,25 @@ import { Pagination } from '@/components/ui/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { formatDate, formatSalaryRange } from '@/lib/utils';
 import { Plus, Eye, Edit, Archive, Trash2, Play } from 'lucide-react';
+import { useUIStore } from '@/stores/uiStore';
 
 const AdminJobsListPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
+  const { formData, setFormData } = useUIStore();
+  const searchQuery = formData['admin-jobs-search'] || '';
+  const statusFilter = formData['admin-jobs-status'] || '';
+  const currentPage = formData['admin-jobs-page'] || 1;
+  const pageSize = 10;
+
+  const setSearchQuery = (value: string) => {
+    setFormData('admin-jobs-search', value);
+  };
+  const setStatusFilter = (value: string) => {
+    setFormData('admin-jobs-status', value);
+    setFormData('admin-jobs-page', 1);
+  };
+  const setCurrentPage = (value: number) => {
+    setFormData('admin-jobs-page', value);
+  };
 
   const { data: jobsData, isLoading, refetch } = useAdminJobs({
     page: currentPage,

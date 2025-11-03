@@ -1,14 +1,22 @@
 "use client";
-import React, { useState } from 'react';
+import React from 'react';
 import api from '@/lib/axios';
+import { API_ROUTES } from '@/lib/api-routes';
 import Link from 'next/link';
 import { useAlert } from '@/hooks/useAlert';
+import { useAuthFormsStore } from '@/stores/authFormsStore';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    email,
+    submitting,
+    message,
+    error,
+    setEmail,
+    setSubmitting,
+    setMessage,
+    setError,
+  } = useAuthFormsStore();
   const { showSuccess, showError } = useAlert();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,7 +25,7 @@ export default function ForgotPasswordPage() {
     setError(null);
     setMessage(null);
     try {
-      await api.post('/auth/forgot-password', { email });
+      await api.post(API_ROUTES.AUTH.FORGOT_PASSWORD, { email });
       setMessage('If this email exists, a reset link has been sent.');
       showSuccess('Email sent', 'If this email exists, a reset link has been sent.');
     } catch (err: any) {

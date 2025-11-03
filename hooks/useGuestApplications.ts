@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import { API_ROUTES } from '@/lib/api-routes';
 import { useGlobalAlert } from '@/providers/AlertProvider';
 
 interface GuestApplicationData {
@@ -67,7 +68,7 @@ export const useApplyAsGuest = () => {
       }
 
       try {
-        const response = await api.post(`/guest/jobs/${data.jobId}/apply/guest`, formData, {
+        const response = await api.post(API_ROUTES.GUEST.APPLY(data.jobId), formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -103,7 +104,7 @@ export const useGuestApplicationByToken = (trackingToken: string) => {
   return useQuery({
     queryKey: ['guestApplication', trackingToken],
     queryFn: async () => {
-      const response = await api.get(`/guest/track/${trackingToken}`);
+      const response = await api.get(API_ROUTES.GUEST.TRACK(trackingToken));
       return response.data;
     },
     enabled: !!trackingToken,
@@ -115,7 +116,7 @@ export const useGuestApplicationsByEmail = (email: string) => {
   return useQuery({
     queryKey: ['guestApplications', email],
     queryFn: async () => {
-      const response = await api.get(`/guest/applications/${email}`);
+      const response = await api.get(API_ROUTES.GUEST.BY_EMAIL(email));
       return response.data;
     },
     enabled: !!email,
@@ -126,7 +127,7 @@ export const useGuestApplicationsByEmail = (email: string) => {
 export const useConvertGuestToUser = () => {
   return useMutation<ConvertToUserResponse, Error, ConvertToUserData>({
     mutationFn: async (data) => {
-      const response = await api.post('/guest/convert-to-user', data);
+      const response = await api.post(API_ROUTES.GUEST.CONVERT_TO_USER, data);
       return response.data;
     },
   });

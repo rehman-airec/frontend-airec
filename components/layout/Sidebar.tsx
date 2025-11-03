@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useTenant } from '@/hooks/useTenant';
+import { useUIStore } from '@/stores/uiStore';
 import {
   LayoutDashboard,
   Briefcase,
@@ -14,6 +17,8 @@ import {
   ChevronRight,
   Heart,
   FileQuestion,
+  Building2,
+  UserPlus,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -22,9 +27,13 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ role }) => {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { sidebarCollapsed, setSidebarCollapsed } = useUIStore();
+  const isCollapsed = sidebarCollapsed[`sidebar-${role}`] || false;
+  const { user } = useAuth();
+  const { tenant } = useTenant();
 
-  const adminNavItems = [
+  // Base admin navigation items
+  const baseAdminNavItems = [
     {
       name: 'Dashboard',
       href: '/admin/dashboard',
@@ -41,6 +50,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       icon: Users,
     },
     {
+      name: 'Employees',
+      href: '/admin/users',
+      icon: Users,
+    },
+    {
       name: 'All Applications',
       href: '/admin/applications',
       icon: Users,
@@ -50,6 +64,28 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       href: '/admin/screening-templates',
       icon: FileQuestion,
     },
+  ];
+
+  // Tenant-specific items (only shown for tenant admins)
+  const tenantNavItems = tenant ? [
+    {
+      name: 'Create User',
+      href: '/admin/tenants/users/create',
+      icon: UserPlus,
+    },
+  ] : [];
+
+  // Super admin items (only shown for superadmin, when NOT in tenant context)
+  // Note: Superadmin should use /superadmin/tenants, not /admin/tenants
+  // But this Sidebar is for admin layout, so we don't show tenant management here
+  // Superadmin has its own sidebar (SuperAdminSidebar)
+  const superAdminNavItems: Array<{ name: string; href: string; icon: React.ComponentType<any> }> = [];
+
+  // Combine all admin nav items
+  const adminNavItems = [
+    ...baseAdminNavItems,
+    ...tenantNavItems,
+    ...superAdminNavItems,
     {
       name: 'Settings',
       href: '/admin/settings',
@@ -89,7 +125,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
     )}>
       {/* Toggle Button */}
       <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        onClick={() => setSidebarCollapsed(`sidebar-${role}`, !isCollapsed)}
         className="absolute -right-3 top-6 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:shadow-md transition-shadow z-10"
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >

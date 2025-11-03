@@ -1,7 +1,7 @@
 export interface User {
   _id: string;
   email: string;
-  role: 'admin' | 'candidate' | 'superadmin';
+  role: 'admin' | 'candidate' | 'superadmin' | 'recruiter' | 'employee';
   name?: string;
   firstName?: string;
   lastName?: string;

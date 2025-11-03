@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useApplication } from '@/hooks/useApplications';
 import { ApplicationWithJob } from '@/types/application.types';
@@ -11,12 +11,15 @@ import { CvViewerModal } from '@/components/shared/CvViewerModal';
 import { ArrowLeft, Calendar, MapPin, Briefcase, Clock, FileText, User } from 'lucide-react';
 import { formatDate, formatSalaryRange } from '@/lib/utils';
 import { getFileUrl } from '@/lib/config';
+import { useRolePath } from '@/hooks/useRolePath';
+import { useApplicationStore } from '@/stores/applicationStore';
 
 const ApplicationDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const applicationId = params.id as string;
-  const [showCvViewer, setShowCvViewer] = useState(false);
+  const { showCvViewer, setShowCvViewer } = useApplicationStore();
+  const rolePath = useRolePath();
 
   const { data: application, isLoading, error } = useApplication(applicationId) as { 
     data: ApplicationWithJob | undefined, 
@@ -40,7 +43,7 @@ const ApplicationDetailPage: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Not Found</h2>
           <p className="text-gray-600 mb-4">The application you're looking for doesn't exist or you don't have access to it.</p>
-          <Button onClick={() => router.push('/candidate/applications')}>
+          <Button onClick={() => router.push(rolePath.applications.list)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Applications
           </Button>

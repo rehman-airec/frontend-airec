@@ -15,6 +15,7 @@ import { setToken } from '@/lib/auth';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuthFormsStore } from '@/stores/authFormsStore';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -50,7 +51,7 @@ interface SignupFormProps {
 const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const { login } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { signupLoading, setSignupLoading } = useAuthFormsStore();
 
   const {
     register,
@@ -69,7 +70,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const onSubmit = async (data: SignupFormData) => {
     console.log('Form submitted with data:', data);
     console.log('Form errors:', errors);
-    setIsLoading(true);
+    setSignupLoading(true);
     try {
       const endpoint = data.role === 'admin' 
         ? API_ROUTES.AUTH.ADMIN_SIGNUP 
@@ -125,7 +126,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Signup failed');
     } finally {
-      setIsLoading(false);
+      setSignupLoading(false);
     }
   };
 
@@ -248,7 +249,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
           <Button
             type="submit"
             className="w-full"
-            loading={isLoading}
+            loading={signupLoading}
             onClick={(e) => {
               console.log('Button clicked');
               const form = e.currentTarget.closest('form');

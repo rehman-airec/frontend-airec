@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ApplicationOverview } from './ApplicationOverview';
 import { NotesSection } from './NotesSection';
 import { LogsSection } from './LogsSection';
@@ -8,6 +8,7 @@ import { CreateEventTab, AddEvaluationTab } from './EventEvaluationTabs';
 import { Tabs } from '@/components/ui/Tabs';
 import { useUpdateApplicationStatus } from '@/hooks/useApplications';
 import { useCreateEvent, useCreateEvaluation } from '@/hooks/useEventsEvaluations';
+import { useApplicationStore } from '@/stores/applicationStore';
 
 interface ApplicationDetailsProps {
   application: any;
@@ -18,9 +19,13 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
   application, 
   onStatusChange 
 }) => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const {
+    activeTab,
+    pendingStatus,
+    setActiveTab,
+    setPendingStatus,
+  } = useApplicationStore();
   const updateStatusMutation = useUpdateApplicationStatus();
-  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const createEventMutation = useCreateEvent();
   const createEvaluationMutation = useCreateEvaluation();
 

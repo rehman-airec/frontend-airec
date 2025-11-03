@@ -3,14 +3,51 @@ import api from '@/lib/axios';
 import { API_ROUTES } from '@/lib/api-routes';
 import { Job, JobCreateRequest, JobUpdateRequest, JobPublishRequest, JobFilters, JobSearchResponse, NormalizedAdminJob } from '@/types/job.types';
 import toast from 'react-hot-toast';
+import { extractSubdomain } from '@/lib/tenantUtils';
 
 // Get all jobs with filters
 export const useJobs = (filters: JobFilters = {}) => {
   return useQuery({
     queryKey: ['jobs', filters],
     queryFn: async (): Promise<JobSearchResponse> => {
-      const response = await api.get(API_ROUTES.JOBS.LIST, { params: filters });
-      return response.data;
+      // In development, use Next.js API proxy to bypass CORS issues
+      const useProxy = process.env.NODE_ENV === 'development';
+      const endpoint = useProxy ? '/api/jobs' : API_ROUTES.JOBS.LIST;
+      
+      // For proxy routes, use fetch directly to avoid baseURL prepending
+      if (useProxy && endpoint.startsWith('/api/')) {
+        const queryParams = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, String(value));
+          }
+        });
+        const url = `${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        
+        const subdomain = typeof window !== 'undefined' 
+          ? extractSubdomain(window.location.hostname)
+          : null;
+        
+        const fetchResponse = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'x-tenant-subdomain': subdomain || '',
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        if (!fetchResponse.ok) {
+          const errorText = await fetchResponse.text();
+          throw new Error(`Proxy request failed: ${fetchResponse.status} - ${errorText}`);
+        }
+        
+        return await fetchResponse.json();
+      } else {
+        // Use axios for backend routes
+        const response = await api.get(API_ROUTES.JOBS.LIST, { params: filters });
+        return response.data;
+      }
     },
   });
 };
@@ -32,8 +69,54 @@ export const useAdminJobs = (filters: { page?: number; limit?: number; status?: 
   return useQuery({
     queryKey: ['admin-jobs', filters],
     queryFn: async (): Promise<{ success: boolean; jobs: NormalizedAdminJob[]; pagination: { current: number; pages: number; total: number } }> => {
-      const response = await api.get(API_ROUTES.JOBS.ADMIN_JOBS, { params: filters });
-      return response.data;
+      // In development, use Next.js API proxy to bypass CORS issues
+      const useProxy = process.env.NODE_ENV === 'development';
+      const endpoint = useProxy ? '/api/jobs/admin/jobs' : API_ROUTES.JOBS.ADMIN_JOBS;
+      
+      // For proxy routes, use fetch directly to avoid baseURL prepending
+      if (useProxy && endpoint.startsWith('/api/')) {
+        const queryParams = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, String(value));
+          }
+        });
+        const url = `${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        
+        const subdomain = typeof window !== 'undefined' 
+          ? extractSubdomain(window.location.hostname)
+          : null;
+        
+        const token = typeof window !== 'undefined' 
+          ? localStorage.getItem('token')
+          : null;
+        
+        const headers: Record<string, string> = {
+          'x-tenant-subdomain': subdomain || '',
+          'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const fetchResponse = await fetch(url, {
+          method: 'GET',
+          headers,
+          credentials: 'include',
+        });
+        
+        if (!fetchResponse.ok) {
+          const errorText = await fetchResponse.text();
+          throw { response: { status: fetchResponse.status, data: { message: errorText } } };
+        }
+        
+        return await fetchResponse.json();
+      } else {
+        // Use axios for backend routes
+        const response = await api.get(API_ROUTES.JOBS.ADMIN_JOBS, { params: filters });
+        return response.data;
+      }
     },
   });
 };
@@ -46,6 +129,8 @@ export const useAdminJobTitles = () => {
       const response = await api.get(API_ROUTES.JOBS.ADMIN_JOB_TITLES);
       return response.data;
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 };
 
